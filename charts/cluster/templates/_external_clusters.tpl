@@ -14,7 +14,7 @@ externalClusters:
   {{- else if eq .Values.recovery.method "object_store" }}
   - name: objectStoreRecoveryCluster
     barmanObjectStore:
-      serverName: {{ .Values.recovery.clusterName }}
+      serverName: {{ .Values.recovery.clusterName | quote }}
       {{- $d := dict "chartFullname" (include "cluster.fullname" .) "scope" .Values.recovery "secretPrefix" "recovery" -}}
       {{- include "cluster.barmanObjectStoreConfig" $d | trimPrefix "\n" | nindent 4 }}
   {{- else if and (eq .Values.recovery.method "plugin") (eq .Values.recovery.pluginConfiguration.name "barman-cloud.cloudnative-pg.io") }}
@@ -26,14 +26,14 @@ externalClusters:
         {{- with $pluginConfigurationParameters }}
         {{- toYaml . | nindent 8 -}}
         {{- end }}
-        barmanObjectName: {{ include "cluster.fullname" . }}-recovery
-        serverName: {{ .Values.recovery.clusterName }}
+        barmanObjectName: {{ include "cluster.barmanObjectName" (dict "context" . "suffix" "recovery") | quote }}
+        serverName: {{ .Values.recovery.clusterName | quote }}
   {{- end }}
 {{- else if eq .Values.mode "replica" }}
   - name: originCluster
   {{- if not (empty .Values.replica.origin.objectStore.provider) }}
     barmanObjectStore:
-      serverName: {{ .Values.replica.origin.objectStore.clusterName }}
+      serverName: {{ .Values.replica.origin.objectStore.clusterName | quote }}
       {{- $d := dict "chartFullname" (include "cluster.fullname" .) "scope" .Values.replica.origin.objectStore "secretPrefix" "origin" -}}
       {{- include "cluster.barmanObjectStoreConfig" $d | trimPrefix "\n" | nindent 4 -}}
   {{- end }}
